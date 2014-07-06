@@ -89,12 +89,3 @@ module Mirador
   end
 
 end
-
-if __FILE__ == $0
-
-  client = Mirador::Client.new('your_key_here')
-  client.classify_urls(ARGV).each do |res|
-    puts(res)
-  end
-
-end
