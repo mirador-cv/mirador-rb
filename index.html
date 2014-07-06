@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Mirador-rb by mirador-cv</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Mirador-rb</h1>
+        <p>Ruby client for Mirador (http://mirador.im) API</p>
+
+        <p class="view"><a href="https://github.com/mirador-cv/mirador-rb">View the Project on GitHub <small>mirador-cv/mirador-rb</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/mirador-cv/mirador-rb/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mirador-cv/mirador-rb/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mirador-cv/mirador-rb">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="mirador" class="anchor" href="#mirador"><span class="octicon octicon-link"></span></a>Mirador</h1>
+
+<p>A simple Ruby client for the <a href="http://mirador.im">mirador</a> Image moderation API.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem 'mirador'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install mirador
+</code></pre>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>There are really two basic methods available on the API. To get started, you need an API key, available from <a href="http://mirador.im/join">mirador.im/join</a>. If you have problems with the API or this client, please contact <a href="mailto:support@mirador.im">support@mirador.im</a>.</p>
+
+<h3>
+<a name="miradorclientclassify_filesfiles---miradorresult" class="anchor" href="#miradorclientclassify_filesfiles---miradorresult"><span class="octicon octicon-link"></span></a><code>Mirador::Client.classify_files(files) -&gt; [Mirador::Result]</code>
+</h3>
+
+<p>This method takes a list of filenames and returns a list of <code>Mirador::Result</code> objects. See example:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'your_key_here'</span><span class="p">)</span>
+<span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="s1">'bathing-suit.jpg'</span><span class="p">,</span> <span class="s1">'nsfw-user-upload.png'</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"name: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span> <span class="si">}</span><span class="s2">, safe: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">safe</span> <span class="si">}</span><span class="s2">, value: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+</pre></div>
+
+<h3>
+<a name="mirdorclientclassify_urlsurls---miradorresult" class="anchor" href="#mirdorclientclassify_urlsurls---miradorresult"><span class="octicon octicon-link"></span></a><code>Mirdor::Client.classify_urls(urls) -&gt; [Mirador::Result]</code>
+</h3>
+
+<p>This method takes a list of urls and returns <code>Mirador::Result</code> objects. Identical to <code>classify_files</code>:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+
+<span class="n">mc</span><span class="o">.</span><span class="n">classify_urls</span><span class="p">(</span><span class="s1">'http://possibly-nsfw.com/cool.png'</span><span class="p">,</span> <span class="s1">'http://mysite.net/image/bad-picture.jpg'</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"name: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span> <span class="si">}</span><span class="s2">, safe: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">safe</span> <span class="si">}</span><span class="s2">, value: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+</pre></div>
+
+<h3>
+<a name="miradorresult" class="anchor" href="#miradorresult"><span class="octicon octicon-link"></span></a><code>Mirador::Result</code>
+</h3>
+
+<p>The <code>Mirador::Result</code> class has 3 fields:</p>
+
+<ul>
+<li>
+<code>Result.name</code> - <code>string</code>, the filename or url for this request</li>
+<li>
+<code>Result.safe</code> - <code>bool</code>, a boolean indicating whether image contains adult content.</li>
+<li>
+<code>Result.value</code> - <code>float</code>, a number 0.0 - 1.0 indicating confidence of judgement</li>
+</ul><h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol><h2>
+<a name="support" class="anchor" href="#support"><span class="octicon octicon-link"></span></a>Support</h2>
+
+<p>Please submit and bugs as issues, and don't hesitate to contact <a href="mailto:support@mirador.im">support@mirador.im</a> with questions or issues.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mirador-cv">mirador-cv</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
