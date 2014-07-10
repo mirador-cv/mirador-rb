@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["nick@mirador.im"]
   gem.description   = %q{Interface to the Mirador Image Moderation API}
   gem.summary       = %q{Simple interface to mirador API }
-  gem.homepage      = "http://github.com/mirador-cv/mirador-rb"
+  gem.homepage      = "http://mirador-cv.github.io/mirador-rb"
   gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($/)
