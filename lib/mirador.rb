@@ -21,7 +21,7 @@ module Mirador
     def self.parse_results reqs, results
 
       if not results
-        return nil
+        raise ApiError, "no results for: #{ reqs }"
       end
 
       results.each_with_index.map do |v, i|
@@ -70,7 +70,7 @@ module Mirador
         raise ApiError, "no response: #{ res.code }"
       end
 
-      Result.parse_results urls, res['results']
+      return Result.parse_results urls, res['results']
     end
 
     def classify_files files
@@ -110,8 +110,6 @@ module Mirador
       processed = images.map { |i| Base64.encode64(i).gsub("\n", '') }
       return self.classify_encoded names, processed
     end
-
-    protected
 
     def process_file file
       data = File.read(file)

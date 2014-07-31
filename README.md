@@ -28,6 +28,7 @@ This method takes a list of filenames and returns a list of `Mirador::Result` ob
 require 'mirador'
 
 mc = Mirador::Client.new('your_key_here')
+
 mc.classify_files('bathing-suit.jpg', 'nsfw-user-upload.png').each do |result|
   puts "name: #{ result.name }, safe: #{ result.safe }, value: #{ result.value }"
 end
@@ -41,6 +42,7 @@ This method takes a list of urls and returns `Mirador::Result` objects. Identica
 ```ruby
 require 'mirador'
 
+mc = Mirador::Client.new('your_key_here')
 mc.classify_urls('http://possibly-nsfw.com/cool.png', 'http://mysite.net/image/bad-picture.jpg').each do |result|
   puts "name: #{ result.name }, safe: #{ result.safe }, value: #{ result.value }"
 end
