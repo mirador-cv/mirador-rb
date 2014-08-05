@@ -33,14 +33,14 @@ end
 
 # mirador client
 client = Mirador::Client.new(api_key)
+out = Mirador::ResultList.new
 
-out = []
 if urls and urls.length > 0
-  out += client.classify_urls(urls)
+  out.update(client.classify_urls(urls).to_h)
 end
 
 if files and files.length > 0
-  out += client.classify_files(files)
+  out.update(client.classify_files(files).to_h)
 end
 
 
