@@ -19,6 +19,7 @@ get '/' do
 
   <<-eot
 <!doctype html>
+<style> #display.safe { border: 5px solid #0e0; } #display.unsafe { border: 5px solid #e00; }</style>
 <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
 <input type='url' id='url'/>
@@ -32,14 +33,14 @@ var $doc = $(document),
     $safe = $('#res-safe');
 
 function onresult(res) {
-  $safe.text(res.safe ? 'safe' : 'unsafe');
+  var safetxt = res.safe ? 'safe' : 'unsafe';
+  $safe.text(safetxt + ': ' + res.value.toString().substr(0, 4));
+  $display.attr('class', safetxt);
 }
 
 $doc.on('change', '#url', function (e) {
-
   $.post('/proxy/mirador/url', { url: this.value }).done(onresult);
   $display.attr('src', this.value);
-
 });
 
 $doc.on('change', '#file', function (e) {
