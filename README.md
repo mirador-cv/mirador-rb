@@ -1,4 +1,4 @@
-# Mirador
+# Mirador [![Build Status](https://drone.io/github.com/mirador-cv/mirador-rb/status.png)](https://drone.io/github.com/mirador-cv/mirador-rb/latest)
 
 A simple Ruby client for the [mirador](http://mirador.im) Image moderation API.
 
