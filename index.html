@@ -54,50 +54,286 @@
 <h2>
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
-<p>There are really two basic methods available on the API. To get started, you need an API key, available from <a href="http://mirador.im/join">mirador.im/join</a>. If you have problems with the API or this client, please contact <a href="mailto:support@mirador.im">support@mirador.im</a>.</p>
+<p>To get started, you need an API key, available from <a href="http://mirador.im/">mirador.im/join</a>. If you have problems with the API or this client, please contact <a href="mailto:support@mirador.im">support@mirador.im</a>.</p>
+
+<h2>
+<a name="miradorresult-and-miradorresultlist" class="anchor" href="#miradorresult-and-miradorresultlist"><span class="octicon octicon-link"></span></a>Mirador::Result and Mirador::ResultList</h2>
+
+<p>All multiple-request methods (e.g., classify_files), return a <a href="#resultlist">Mirador::ResultList</a>, which is effectively a list of Mirador::Result objects; single-request methods (e.g., classify_url) return a <a href="#result">Mirador::Result</a> object.</p>
+
+<h2>
+<a name="classifying-files--buffers" class="anchor" href="#classifying-files--buffers"><span class="octicon octicon-link"></span></a>Classifying Files &amp; Buffers</h2>
+
+<p>You can classify 4 types of files/file-objects:</p>
+
+<ul>
+<li>file objects (e.g., <code>x</code> where <code>x = File.open('myfile.jpg')</code>); <a href="#classify_files">classify_files</a>
+</li>
+<li>filenames <code>myfile.jpg</code> <a href="#classify_files">classify_files</a>
+</li>
+<li>buffers <code>buffer = File.read('myfile.jpg')</code> <a href="#classify_buffers">classify_buffers</a>
+</li>
+<li>base64-encoded buffers (e.g., from a data URI) <a href="#classify_encoded_strings">classify_encoded_strings</a>
+</li>
+</ul><p>The methods for file-based classification are as follows:</p>
 
 <h3>
-<a name="miradorclientclassify_filesfiles---miradorresult" class="anchor" href="#miradorclientclassify_filesfiles---miradorresult"><span class="octicon octicon-link"></span></a><code>Mirador::Client.classify_files(files) -&gt; [Mirador::Result]</code>
-</h3>
-
-<p>This method takes a list of filenames and returns a list of <code>Mirador::Result</code> objects. See example:</p>
+<a name="-miradorclientclassify_files" class="anchor" href="#-miradorclientclassify_files"><span class="octicon octicon-link"></span></a>
+<a name="classify_files"></a> Mirador::Client#classify_files</h3>
 
 <div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'your_api_key'</span><span class="p">)</span>
 
-<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'your_key_here'</span><span class="p">)</span>
-<span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="s1">'bathing-suit.jpg'</span><span class="p">,</span> <span class="s1">'nsfw-user-upload.png'</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
-  <span class="nb">puts</span> <span class="s2">"name: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span> <span class="si">}</span><span class="s2">, safe: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">safe</span> <span class="si">}</span><span class="s2">, value: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="s1">'test.jpg'</span><span class="p">,</span> <span class="s1">'picture.jpg'</span><span class="p">)</span>
+
+<span class="n">assert</span> <span class="n">results</span><span class="o">[</span><span class="s1">'test.jpg'</span><span class="o">]</span>
+<span class="n">assert_equal</span> <span class="n">results</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">2</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">res</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"</span><span class="si">#{</span> <span class="n">res</span><span class="o">.</span><span class="n">id</span> <span class="si">}</span><span class="s2">, </span><span class="si">#{</span> <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="nb">id</span><span class="p">,</span> <span class="n">res</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"</span><span class="si">#{</span> <span class="nb">id</span> <span class="si">}</span><span class="s2">, </span><span class="si">#{</span> <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
 <span class="k">end</span>
 
 </pre></div>
 
-<h3>
-<a name="mirdorclientclassify_urlsurls---miradorresult" class="anchor" href="#mirdorclientclassify_urlsurls---miradorresult"><span class="octicon octicon-link"></span></a><code>Mirdor::Client.classify_urls(urls) -&gt; [Mirador::Result]</code>
-</h3>
-
-<p>This method takes a list of urls and returns <code>Mirador::Result</code> objects. Identical to <code>classify_files</code>:</p>
+<p>You can also specify an id to be used:</p>
 
 <div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
 
-<span class="n">mc</span><span class="o">.</span><span class="n">classify_urls</span><span class="p">(</span><span class="s1">'http://possibly-nsfw.com/cool.png'</span><span class="p">,</span> <span class="s1">'http://mysite.net/image/bad-picture.jpg'</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
-  <span class="nb">puts</span> <span class="s2">"name: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span> <span class="si">}</span><span class="s2">, safe: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">safe</span> <span class="si">}</span><span class="s2">, value: </span><span class="si">#{</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span> <span class="si">}</span><span class="s2">"</span>
-<span class="k">end</span>
+<span class="c1"># first method: use ids as keys</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="s1">'nsfw.jpg'</span><span class="p">,</span> <span class="ss">sfw</span><span class="p">:</span> <span class="s1">'sfw.jpg'</span><span class="p">)</span>
 
+<span class="n">assert</span> <span class="n">results</span><span class="o">[</span><span class="ss">:nsfw</span><span class="o">]</span>
+<span class="n">assert</span> <span class="n">results</span><span class="o">[</span><span class="ss">:sfw</span><span class="o">]</span>
+
+<span class="c1"># second method: pass an array of { id:, data: } hashes</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="o">[</span><span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="ss">:nsfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="s1">'nsfw.jpg'</span><span class="p">},</span> <span class="p">{</span> <span class="nb">id</span><span class="p">:</span> <span class="ss">:sfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="s1">'sfw.jpg'</span> <span class="p">}</span><span class="o">]</span><span class="p">)</span>
+
+<span class="n">assert</span> <span class="n">results</span><span class="o">[</span><span class="ss">:nsfw</span><span class="o">]</span>
+<span class="n">assert</span> <span class="n">results</span><span class="o">[</span><span class="ss">:sfw</span><span class="o">]</span>
+</pre></div>
+
+<p>File can be either a filename or a file object; e.g., the following is also valid:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_files</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">'nsfw.jpg'</span><span class="p">))</span>
 </pre></div>
 
 <h3>
-<a name="miradorresult" class="anchor" href="#miradorresult"><span class="octicon octicon-link"></span></a><code>Mirador::Result</code>
-</h3>
+<a name="-miradorclientclassify_file" class="anchor" href="#-miradorclientclassify_file"><span class="octicon octicon-link"></span></a>
+<a name="classify_file"></a> Mirador::Client#classify_file</h3>
 
-<p>The <code>Mirador::Result</code> class has 3 fields:</p>
+<p>A shortcut for classifying a single file; this will return a <code>Mirador::Result</code> instead of a <code>Mirador::ResultList</code>:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+
+<span class="c1"># first method: use ids as keys</span>
+<span class="n">nsfw</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_file</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="s1">'nsfw.jpg'</span><span class="p">)</span>
+
+<span class="nb">puts</span> <span class="n">nsfw</span><span class="o">.</span><span class="n">value</span>
+</pre></div>
+
+<h3>
+<a name="-miradorclientclassify_buffers" class="anchor" href="#-miradorclientclassify_buffers"><span class="octicon octicon-link"></span></a>
+<a name="classify_buffers"></a> Mirador:Client#classify_buffers</h3>
+
+<p>Classify a buffer, e.g., an already-read file. This simplifies the classification of file uploads, e.g. POST data. The interface is identical to <a href="#classify_files">classify_files</a>, only differing in the actual data passed in:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+
+<span class="n">nsfw_buf</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'nsfw.jpg'</span><span class="p">)</span>
+<span class="n">sfw_buf</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'sfw.jpg'</span><span class="p">)</span>
+
+<span class="c1"># these are equivalent</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_buffers</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="n">nsfw_buf</span><span class="p">,</span> <span class="ss">sfw</span><span class="p">:</span> <span class="n">sfw_buf</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_buffers</span><span class="p">(</span><span class="o">[</span><span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="ss">:nsfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="n">nsfw_buf</span><span class="p">},</span> <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="ss">:sfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="n">sfw_buf</span><span class="p">}</span><span class="o">]</span><span class="p">)</span>
+
+<span class="c1"># since buffers dont have a name, you just get an index as id</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_buffers</span><span class="p">(</span><span class="n">nsfw_buf</span><span class="p">,</span> <span class="n">sfw_buf</span><span class="p">)</span>
+</pre></div>
+
+<h4>
+<a name="-miradorclientclassify_buffer" class="anchor" href="#-miradorclientclassify_buffer"><span class="octicon octicon-link"></span></a>
+<a name="classify_buffer"></a> Mirador::Client#classify_buffer</h4>
+
+<p>As with classify_file, there is a shortcut for classifying only one buffer; see <a href="#classify_file">classify_file</a> for clarifications on usage (it's identical).</p>
+
+<h3>
+<a name="-miradorclientclassify_encoded_strings" class="anchor" href="#-miradorclientclassify_encoded_strings"><span class="octicon octicon-link"></span></a>
+<a name="classify_encoded_strings"></a> Mirador::Client#classify_encoded_strings</h3>
+
+<p>The Mirador API internally represents images as base64-encoded strings (agnostic of image encoding); this method lets you pass in an alread-encoded string in the event that you're also using base64 encoding elsewhere in your system. Usage is the same as <a href="#classify_buffers">classify_buffers</a>:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+<span class="nb">require</span> <span class="s1">'base64'</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+
+<span class="n">nsfw_buf</span> <span class="o">=</span> <span class="no">Base64</span><span class="o">.</span><span class="n">encode64</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'nsfw.jpg'</span><span class="p">))</span>
+<span class="n">sfw_buf</span> <span class="o">=</span> <span class="no">Base64</span><span class="o">.</span><span class="n">encode64</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'sfw.jpg'</span><span class="p">))</span>
+
+<span class="c1"># these are equivalent</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_encoded_strings</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="n">nsfw_buf</span><span class="p">,</span> <span class="ss">sfw</span><span class="p">:</span> <span class="n">sfw_buf</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_encoded_strings</span><span class="p">(</span><span class="o">[</span><span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="ss">:nsfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="n">nsfw_buf</span><span class="p">},</span> <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="ss">:sfw</span><span class="p">,</span> <span class="ss">data</span><span class="p">:</span> <span class="n">sfw_buf</span><span class="p">}</span><span class="o">]</span><span class="p">)</span>
+
+<span class="c1"># since strings dont have a name, you just get an index as id</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_encoded_strings</span><span class="p">(</span><span class="n">nsfw_buf</span><span class="p">,</span> <span class="n">sfw_buf</span><span class="p">)</span>
+</pre></div>
+
+<h4>
+<a name="-miradorclientclassify_encoded_string" class="anchor" href="#-miradorclientclassify_encoded_string"><span class="octicon octicon-link"></span></a>
+<a name="classify_encoded_string"></a> Mirador::Client#classify_encoded_string</h4>
+
+<p>Another helper for only working with 1 request/result at a time. See <a href="#classify_file">classify_file</a> for more info.</p>
+
+<h3>
+<a name="-miradorclientclassify_data_uris" class="anchor" href="#-miradorclientclassify_data_uris"><span class="octicon octicon-link"></span></a>
+<a name="classify_data_uris"></a> Mirador::Client#classify_data_uris</h3>
+
+<p>This simplifies data transfer between client applications and the mirador API. For example, given the following javascript:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'form-field'</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'change'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">files</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+  <span class="kd">var</span> <span class="nx">reader</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FileReader</span><span class="p">();</span>
+  <span class="nx">reader</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">'/proxy/mirador'</span><span class="p">,</span> <span class="p">{</span> <span class="nx">id</span><span class="o">:</span> <span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">data</span><span class="o">:</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">result</span> <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">reader</span><span class="p">.</span><span class="nx">readAsDataURL</span><span class="p">(</span><span class="nx">file</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>Your could classify that data url with the following code:</p>
+
+<div class="highlight highlight-ruby"><pre>
+<span class="n">res</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_data_uris</span><span class="p">(</span><span class="n">request</span><span class="o">[</span><span class="s1">'id'</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="n">request</span><span class="o">[</span><span class="s1">'data'</span><span class="o">]</span><span class="p">)</span>
+
+<span class="c1"># send the result</span>
+<span class="n">res</span><span class="o">[</span><span class="n">request</span><span class="o">[</span><span class="s1">'id'</span><span class="o">]].</span><span class="n">to_json</span>
+
+<span class="c1"># or, even easier</span>
+<span class="n">mc</span><span class="o">.</span><span class="n">classify_data_uri</span><span class="p">(</span><span class="n">request</span><span class="o">[</span><span class="s1">'id'</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="n">request</span><span class="o">[</span><span class="s1">'data'</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span>
+
+</pre></div>
+
+<p>Otherwise, classify_data_uris and classify_data_uri have identical interfaces to the other methods covered so far.</p>
+
+<h2>
+<a name="classify-urls" class="anchor" href="#classify-urls"><span class="octicon octicon-link"></span></a>Classify URLs</h2>
+
+<p>You can easily classify a publically-available URL (e.g., a public s3 bucket), with <a href="#classify_urls">classify_urls</a> and <a href="#classify_url">classify_url</a>. The interfaces for these methods are identical to the file-handling methods covered above.</p>
+
+<h3>
+<a name="-miradorclientclassify_urls" class="anchor" href="#-miradorclientclassify_urls"><span class="octicon octicon-link"></span></a>
+<a name="classify_urls"></a> Mirador::Client#classify_urls</h3>
+
+<p>The only things to keep in mind with URLs:</p>
+
+<ul>
+<li>must be publically-accessibly</li>
+<li>must be &lt; Mirador::Client::MAX_ID_LEN if you are using the url as the item's id (see below)</li>
+<li>download/response time on url will affect response time of result, must be less than 60 seconds.</li>
+</ul><h4>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples:</h4>
+
+<p>Assigning specific ids to urls:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_urls</span><span class="p">(</span><span class="ss">nsfw</span><span class="p">:</span> <span class="s1">'http://static.mirador.im/test/nsfw.jpg'</span><span class="p">,</span> <span class="ss">sfw</span><span class="p">:</span> <span class="s1">'http://static.mirador.im/test/sfw.jpg'</span><span class="p">)</span>
+
+<span class="n">assert</span> <span class="n">res</span><span class="o">[</span><span class="ss">:nsfw</span><span class="o">]</span>
+<span class="n">assert</span> <span class="n">res</span><span class="o">[</span><span class="ss">:sfw</span><span class="o">].</span><span class="n">safe</span>
+
+</pre></div>
+
+<p>Implicitly using url as its own id:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+
+<span class="n">nsfw_url</span> <span class="o">=</span> <span class="s1">'http://static.mirador.im/test/nsfw.jpg'</span>
+<span class="n">sfw_url</span> <span class="o">=</span> <span class="s1">'http://static.mirador.im/test/sfw.jpg'</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_urls</span><span class="p">(</span><span class="n">nsfw_url</span><span class="p">,</span> <span class="n">sfw_url</span><span class="p">)</span>
+
+<span class="nb">puts</span> <span class="n">res</span><span class="o">[</span><span class="n">nsfw_url</span><span class="o">].</span><span class="n">value</span>
+<span class="nb">puts</span> <span class="n">res</span><span class="o">[</span><span class="n">sfw_url</span><span class="o">].</span><span class="n">value</span>
+</pre></div>
+
+<p>Classify a single URL using Mirador::Client#classify_url</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'mirador'</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="no">Mirador</span><span class="o">::</span><span class="no">Client</span><span class="o">.</span><span class="n">new</span> <span class="s1">'your_api_key'</span>
+<span class="n">nsfw</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">classify_url</span><span class="p">(</span><span class="n">nsfw_url</span><span class="p">)</span>
+
+<span class="n">assert</span> <span class="p">(</span><span class="ow">not</span> <span class="n">nsfw</span><span class="o">.</span><span class="n">safe</span><span class="p">)</span>
+<span class="nb">puts</span> <span class="n">nsfw</span><span class="o">.</span><span class="n">value</span>
+</pre></div>
+
+<h2>
+<a name="-miradorresult" class="anchor" href="#-miradorresult"><span class="octicon octicon-link"></span></a>
+<a name="result"></a> Mirador::Result</h2>
+
+<p>The <code>Mirador::Result</code> class wraps the output of the API for a specific image/url. It has the following attributes:</p>
 
 <ul>
 <li>
-<code>Result.name</code> - <code>string</code>, the filename or url for this request</li>
+<code>@id</code> [Mixed]: the id, as specified in the request, or implied (see above)</li>
 <li>
-<code>Result.safe</code> - <code>bool</code>, a boolean indicating whether image contains adult content.</li>
+<code>@safe</code> [Boolean]: whether the image should be considered flagged/containing adult content</li>
 <li>
-<code>Result.value</code> - <code>float</code>, a number 0.0 - 1.0 indicating confidence of judgement</li>
+<code>@value</code> [Float 0.0-1.0]: A float indicating the likelyhood of the image containing adult content (useful for creating custom thresholds)</li>
+<li>
+<code>@error</code> [String]: will only be non-nil if this is an error</li>
+</ul><p>The <code>Mirador::Result</code> object also has a couple of convenience methods:</p>
+
+<ul>
+<li>
+<code>#to_h</code> - convert to a hash</li>
+<li>
+<code>#to_json</code> - if json is require'd, serialize to json</li>
+<li>
+<code>#failed?</code> - returns a boolean indicating whether image is a failure/error</li>
+<li>
+<code>#to_s</code> - returns a string representation of the result`</li>
+<li>
+<code>#name</code> <strong>(deprecated)</strong> - this simply maps to <code>@id</code>
+</li>
+</ul><h2>
+<a name="-miradorresultlist-enumerable" class="anchor" href="#-miradorresultlist-enumerable"><span class="octicon octicon-link"></span></a>
+<a name="resultlist"></a> Mirador::ResultList [Enumerable]</h2>
+
+<p>Methods that return multiple results do so by returning a single <code>Mirador::ResultList</code>. This object is used in lieu of a Hash or Array as to provide mixed-access. You can treat it as an array, iterating via <code>each do |x|</code>, indexing with integers, or by simply calling <code>#to_a</code>, or as a hash, indexing with <code>@id</code>'s from image-requests.</p>
+
+<p>The ResultList has the following methods:</p>
+
+<ul>
+<li>
+<code>#[](key)</code> operator override to index the ResultList. You can index by integers in range of 0 - ResultList#length, or by an <code>@id</code> for one of the Result objects within.</li>
+<li>
+<code>#to_a</code> convert to an array of <code>Mirador::Result</code> objects</li>
+<li>
+<code>#length</code> the number of items in the <code>ResultList</code>
+</li>
+<li>
+<code>#update</code> equivalent to Hash#update</li>
+<li>
+<code>#to_h</code> conver to a hash</li>
+<li>
+<code>#to_json</code> serialize the resultlist as json</li>
+<li>
+<code>#each</code> <code>ResultList</code> includes <code>Enumerable</code>, and this implementation of <code>#each</code> checks the arity of blocks passed in to allow iteration either as an array or as a Hash.</li>
 </ul><h2>
 <a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
 
