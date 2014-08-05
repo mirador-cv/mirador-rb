@@ -126,9 +126,9 @@ module Mirador
     include HTTParty
     base_uri 'api.mirador.im'
 
-    default_timeout 10
+    default_timeout 20
 
-    MAX_LEN = 5
+    MAX_LEN = 4
     MAX_ID_LEN = 256
     DATA_URI_PRE = ';base64,'
     DATA_URI_PRELEN = 8
