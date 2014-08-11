@@ -159,6 +159,41 @@ class MiradorTest < Test::Unit::TestCase
 
   end
 
+  def test_switch_parser 
+
+    res = MM.classify_url 'http://static.mirador.im/test/nsfw.jpg' do |results|
+
+      r = Hash[results.map do |x|
+        [x['id'], x['result']]
+      end]
+
+      r
+    end
+
+    assert res.is_a?(Hash)
+
+    res_norm = MM.classify_url 'http://static.mirador.im/test/sfw.jpg'
+
+    assert (not res_norm.is_a?(Hash))
+
+  end
+
+  def test_multiple_custom_parse
+
+    res = MM.classify_urls('http://static.mirador.im/test/nsfw.jpg', 'http://static.mirador.im/test/sfw.jpg') do |results|
+
+      r = Hash[results.map do |x|
+        [x['id'], x['result']]
+      end]
+
+      r
+    end
+
+    assert res.is_a?(Hash)
+    assert res.has_key?('http://static.mirador.im/test/nsfw.jpg')
+
+  end
+
   def test_item_error
 
     res = MM.classify_urls([{ id: :nsfw, data: 'invalid-url'}, { id: :sfw, data: SFW_URL }])
@@ -167,6 +202,35 @@ class MiradorTest < Test::Unit::TestCase
     assert res[:sfw]
 
     assert res.any? do |r| r.failed? end
+
+  end
+
+  def test_custom_parser
+
+    mc = Mirador::Client.new ENV['MIRADOR_API_KEY'] do |results|
+
+      res = Hash[results.map do |x|
+        r = x['result']
+
+        [x['id'], {
+          id: x['id'],
+          breast: r['breast4'],
+          penis: r['penis4'],
+          vagina: r['vagina4'],
+          butt: r['butt4'],
+        }]
+
+      end]
+
+      res
+    end
+
+    res = mc.classify_url 'http://static.mirador.im/test/nsfw.jpg'
+
+    assert res.is_a?(Hash)
+
+    assert res[:breast]
+    assert res[:penis]
 
   end
 

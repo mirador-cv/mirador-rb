@@ -135,19 +135,57 @@ module Mirador
 
     def initialize(api_key)
       @options = { api_key: api_key }
+
+      if block_given?
+        @parser = Proc.new
+      else
+        @parser = nil
+      end
+
     end
 
     # metaprogramming extreme
     [:url, :file, :buffer, :encoded_string, :data_uri].each do |datatype|
-      define_method("classify_#{datatype.to_s}s") do |args, params={}|
-        flexible_request args, params do |item|
+      define_method("classify_#{datatype.to_s}s") do |args, params={}, &block|
+
+        if block != nil
+          old_parser = @parser
+          @parser = block
+        end
+
+
+        res = flexible_request args, params do |item|
           fmt_items(datatype, item)
         end
+
+        if block != nil
+          @parser = old_parser
+        end
+
+
+        res
       end
 
-      define_method("classify_#{datatype.to_s}") do |args, params={}|
+      define_method("classify_#{datatype.to_s}") do |args, params={}, &block|
+
+        if block != nil
+          old_parser = @parser
+          @parser = block
+        end
+
         res = self.send("classify_#{datatype.to_s}s", args, params)
-        res[0]
+
+        if @parser
+          out = if res != nil then res.values()[0] else nil end
+        else
+          out = if res != nil then res[0] else nil end
+        end
+
+        if block != nil
+          @parser = old_parser
+        end
+
+        out
       end
 
     end
@@ -238,7 +276,13 @@ module Mirador
     # call the block X number of times
     # where X is request.length / MAX_LEN
     def chunked_request req, &mthd
-      output = ResultList.new
+
+      if @parser != nil
+        output = {}
+      else
+        output = ResultList.new
+      end
+
       req.each_slice(MAX_LEN).each do |slice|
         output.update(mthd.call(slice))
       end
@@ -339,7 +383,12 @@ module Mirador
         raise ApiError, "no response: #{ res.code }"
       end
 
-      return ResultList.parse_results res[k]
+      if @parser != nil 
+        return @parser.call(res[k])
+      else
+
+        return ResultList.parse_results res[k]
+      end
     end
 
   end
